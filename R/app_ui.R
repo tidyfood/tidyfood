@@ -3,15 +3,24 @@
 #' @param request Internal parameter for `{shiny}`.
 #'     DO NOT REMOVE.
 #' @import shiny
+#' @import bslib
 #' @noRd
 app_ui <- function(request) {
   tagList(
     # Leave this function for adding external resources
     golem_add_external_resources(),
     # Your application UI logic
-    fluidPage(
-      h1("tidyfood")
-    )
+    page_navbar(
+      theme = bs_theme(bootswatch = "pulse"),
+      title = "Tidyfood",
+      homepage_ui("home_id"),
+      nav_menu(
+        title = 'Data Cleaning',icon = bs_icon("wind"),
+        project_init_ui("project_init_id"),
+        project_restart_ui("project_restart_id"),
+      ),
+
+      )
   )
 }
 
