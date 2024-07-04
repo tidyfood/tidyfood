@@ -14,10 +14,9 @@ app_ui <- function(request) {
       theme = bs_theme(bootswatch = "pulse"),
       title = "Tidyfood",
       homepage_ui("home_id"),
+      project_init_ui("project_init_id"),
       nav_menu(
         title = 'Data Cleaning',icon = bs_icon("wind"),
-        project_init_ui("project_init_id"),
-        project_restart_ui("project_restart_id"),
       ),
 
       )

@@ -13,153 +13,144 @@ project_init_ui <- function(id) {
   ns <- NS(id)
   nav_panel(
     title = 'Initialize project',
-    icon = bs_icon("airplane"),
-    layout_sidebar(
-      sidebar = sidebar(
-        title = "Upload",
-        shinyDirButton(id = ns("prj_wd"),
-                       label = "Set working directory" ,
-                       title = "Set working directory:",
-                       buttonType = "default", class = NULL,
-                       icon = bs_icon("folder"), multiple = FALSE),
-        tags$span(textOutput(outputId = ns("raw_wd_path")), class = "text-wrap"),
+    icon = bsicons::bs_icon("play-circle"),
+    navset_card_tab(
+      title = "Start your project.",
+      header = "Step 1",
+      sidebar = accordion(
+        accordion_panel(
+          title = "Working directory",
+          icon = bsicons::bs_icon("menu-app"),
+          shinyDirButton(id = ns("prj_wd"),
+                         label = "Set working directory" ,
+                         title = "Set working directory:",
+                         buttonType = "default", class = NULL,
+                         icon = bsicons::bs_icon("folder"), multiple = FALSE),
+          tags$span(textOutput(outputId = ns("raw_wd_path")), class = "text-wrap"),
 
-        fileInput(
-          inputId = ns('SampleInfo'),
-          label = 'Sample Information',
-          multiple = FALSE,
-          accept = '.csv'
-        ),
-        p('Make sure your file structure is consistent with the following image',style = "color: #7a8788;font-size: 12px; font-style:Italic"),
-        img(src = "https://shawnmagic-1257599720.cos.ap-chengdu.myqcloud.com/picgo20240319180805.png",width = "100%"),
+          fileInput(
+            inputId = ns('SampleInfo'),
+            label = 'Sample Information',
+            multiple = FALSE,
+            accept = '.csv'
+          ),
 
-        selectInput(
-          inputId = ns("sample_id_raw"),label = "sample id",choices = c("sample_id",'injection.order',"class","group"),
-          selected = "sample_id",multiple = FALSE
-        ),
-        selectInput(
-          inputId = ns("injection.order_raw"),label = "injection order",choices = c("sample_id",'injection.order',"class","group"),
-          selected = "injection.order",multiple = FALSE
-        ),
-        selectInput(
-          inputId = ns("class_raw"),label = "class",choices = c("sample_id",'injection.order',"class","group","batch"),
-          selected = "class",multiple = FALSE
-        ),
-        selectInput(
-          inputId = ns("group_raw"),label = "group",choices = c("sample_id",'injection.order',"class","group","batch"),
-          selected = "group",multiple = FALSE
-        ),
-        selectInput(
-          inputId = ns("batch_raw"),label = "batch",choices = c("sample_id",'injection.order',"class","group","batch"),
-          selected = "batch",multiple = FALSE
-        )
-      ), ## side bar
-      card(
-        full_screen = T,
-        height = 300,
-        card_header(
-          "File check"
-        ),
-        card_body(
-          actionButton(inputId = ns('action_init'),'Initialize project',icon = icon("play"), style = "width: 200px;")
-        ),
-        htmlOutput(outputId = ns("file_check_init")),
-        card_body(
-          fill = FALSE, gap = 0,
-          card_title("Attention!",style = "color: orange;"),
-          p(class = "text-muted", "Please ensure that the file check results are correct before proceeding with further analysis.")
-        )
-      ),
-      card(
-        full_screen = T,
-        height = 350,
-        card_header(
-          "Sample information"
-        ),
-        DT::dataTableOutput(ns("tbl_sample_info"))
-      ),
-    )
-  )
-}
+          p('Make sure your file structure is consistent with the following image',style = "color: #7a8788;font-size: 12px; font-style:Italic"),
+          img(src = "https://shawnmagic-1257599720.cos.ap-chengdu.myqcloud.com/picgo20240319180805.png",width = "100%"),
 
-#' project restart UI
-#'
-#' @param request Internal parameter for `{shiny}`.
-#'     DO NOT REMOVE.
-#' @import shiny
-#' @importFrom bsicons bs_icon
-#' @importFrom shinyjs useShinyjs
-#' @importFrom shinyFiles shinyDirButton shinyFilesButton
-#' @importFrom DT dataTableOutput
-#' @noRd
-
-project_restart_ui <- function(id) {
-  ns <- NS(id)
-  nav_panel(
-    title = 'Resume from unfinished task',
-    icon = bs_icon("airplane"),
-    layout_sidebar(
-      sidebar = sidebar(
-        title = "Upload files",
-        selectInput_div(
-          inputId = ns("init_steps"),label = "Choose steps",
-          choices = c("Remove noisey feature","Remove outlier","impute missing value","Normalization","Annotation","Annotation filtering","Data integrate","DAM and rest"),
-          selected = NULL,multiple = F,
-          title = "Choose steps"
+          selectInput(
+            inputId = ns("sample_id_raw"),label = "sample id",choices = c("sample_id",'injection.order',"class","group"),
+            selected = "sample_id",multiple = FALSE
+          ),
+          selectInput(
+            inputId = ns("injection.order_raw"),label = "injection order",choices = c("sample_id",'injection.order',"class","group"),
+            selected = "injection.order",multiple = FALSE
+          ),
+          selectInput(
+            inputId = ns("class_raw"),label = "class",choices = c("sample_id",'injection.order',"class","group","batch"),
+            selected = "class",multiple = FALSE
+          ),
+          selectInput(
+            inputId = ns("group_raw"),label = "group",choices = c("sample_id",'injection.order',"class","group","batch"),
+            selected = "group",multiple = FALSE
+          ),
+          selectInput(
+            inputId = ns("batch_raw"),label = "batch",choices = c("sample_id",'injection.order',"class","group","batch"),
+            selected = "batch",multiple = FALSE
+          )
         ),
-        shinyFilesButton(
-          id = ns('saved_obj_pos'),buttonType = "default",title = "load mass dataset object (positive) ",
-          label = 'Positive object',
-          class = NULL,
-          icon = bs_icon("database"), multiple = FALSE
-        ),
-        tags$span(textOutput(outputId = ns("saved_obj_pos")), class = "text-wrap"),
-        p('Make sure your input .rda file is AUTO saved file by THIS SHINY APP.',style = "color: #7a8788;font-size: 12px; font-style:Italic") ,
-        shinyFilesButton(
-          id = ns('saved_obj_neg'),buttonType = "default",title = "load mass dataset object (positive) ",
-          label = 'Negative object',
-          class = NULL,
-          icon = bs_icon("database"), multiple = FALSE
-        ),
-        tags$span(textOutput(outputId = ns("saved_obj_neg")),  class = "text-wrap"),
-        p('Make sure your input .rda file is AUTO saved file by THIS SHINY APP.',style = "color: #7a8788;font-size: 12px; font-style:Italic"),
-        shinyFilesButton(
-          id = ns('init_dblist'),buttonType = "default",title = "load saved database list file (option) ",
-          label = 'load database file ',
-          class = NULL,
-          icon = bs_icon("folder"), multiple = FALSE
-        ),
-        tags$span(textOutput(outputId = ns("init_dblist")),  class = "text-wrap"),
-        p('Make sure your input .rda file is AUTO saved file by Annotation step, only needed in re-analysis annotation filtering step.',style = "color: #7a8788;font-size: 12px; font-style:Italic"),
-
-      ), ## side bar
-      card(
-        full_screen = T,
-        height = 300,
-        card_header(
-          "File check"
-        ),
-        card_body(
-          actionButton(inputId = ns('action_init'),'Initialize project',icon = icon("play"), style = "width: 200px;")
-        ),
-        htmlOutput(outputId = ns("file_check_init")),
-        card_body(
-          fill = FALSE, gap = 0,
-          card_title("Attention!",style = "color: orange;"),
-          p(class = "text-muted", "Please ensure that the file check results are correct before proceeding with further analysis.")
+        accordion_panel(
+          title = "Resuming task",
+          icon = bsicons::bs_icon("repeat"),
+          selectInput_div(
+            inputId = ns("init_steps"),label = "Choose steps",
+            choices = c("Remove noisey feature","Remove outlier","impute missing value","Normalization","Annotation","Annotation filtering","Data integrate","DAM and rest"),
+            selected = NULL,multiple = F,
+            title = "Choose steps"
+          ),
+          shinyFilesButton(
+            id = ns('saved_obj_pos'),buttonType = "default",title = "load mass dataset object (positive) ",
+            label = 'Positive object',
+            class = NULL,
+            icon = bsicons::bs_icon("database"), multiple = FALSE
+          ),
+          tags$span(textOutput(outputId = ns("saved_obj_pos")), class = "text-wrap"),
+          p('Make sure your input .rda file is AUTO saved file by THIS SHINY APP.',style = "color: #7a8788;font-size: 12px; font-style:Italic") ,
+          shinyFilesButton(
+            id = ns('saved_obj_neg'),buttonType = "default",title = "load mass dataset object (positive) ",
+            label = 'Negative object',
+            class = NULL,
+            icon = bsicons::bs_icon("database"), multiple = FALSE
+          ),
+          tags$span(textOutput(outputId = ns("saved_obj_neg")),  class = "text-wrap"),
+          p('Make sure your input .rda file is AUTO saved file by THIS SHINY APP.',style = "color: #7a8788;font-size: 12px; font-style:Italic"),
+          shinyFilesButton(
+            id = ns('init_dblist'),buttonType = "default",title = "load saved database list file (option) ",
+            label = 'load database file ',
+            class = NULL,
+            icon = bsicons::bs_icon("folder"), multiple = FALSE
+          ),
+          tags$span(textOutput(outputId = ns("init_dblist")),  class = "text-wrap"),
+          p('Make sure your input .rda file is AUTO saved file by Annotation step, only needed in re-analysis annotation filtering step.',style = "color: #7a8788;font-size: 12px; font-style:Italic"),
         )
       ),
-      card(
-        full_screen = T,
-        height = 350,
-        card_header(
-          "Sample information"
+      nav_panel(
+        title = "Setting working directory",
+        icon = bsicons::bs_icon("power"),
+        card(
+          full_screen = T,
+          height = 300,
+          card_header(
+            "File check"
+          ),
+          card_body(
+            fill = FALSE,gap = 0,
+            actionButton(inputId = ns('action_init'),'Initialize project',icon = icon("play"), style = "width: 200px;"),
+            hr_head(),
+            ),
+          htmlOutput(outputId = ns("file_check_init")),
+          card_body(
+            fill = FALSE, gap = 0,
+            card_title("Attention!",style = "color: orange;"),
+            p(class = "text-muted", "Please ensure that the file check results are correct before proceeding with further analysis.")
+          )
         ),
-        DT::dataTableOutput(ns("tbl_sample_info"))
+        card(
+          full_screen = T,
+          height = 350,
+          card_header(
+            "Sample information"
+          ),
+          DT::dataTableOutput(ns("tbl_sample_info"))
+        )
+      ),
+      nav_panel(
+        title = "Resuming analysis from the unfinished steps",
+        icon = bsicons::bs_icon("repeat"),
+        layout_column_wrap(
+          width = 1/2,
+          height = 300,
+          card(
+            full_screen = T,
+            height = 350,
+            card_header(
+              "Positive model"
+            ),
+            verbatimTextOutput(ns("res_pos_mod"))
+          ),
+          card(
+            full_screen = T,
+            height = 350,
+            card_header(
+              "Negative model"
+            ),
+            verbatimTextOutput(ns("res_neg_mod"))
+          )
+        )
       )
-
     )
   )
+
 }
 
 
@@ -348,6 +339,17 @@ project_init_server <- function(id,volumes,prj_init) {
             init_db_file_check
           )))
         })
+        #> status
+        #> information of mass datasets
+        output$res_pos_mod = renderPrint({
+          if(is.null(prj_init$object_positive.init)){return()}
+          print(prj_init$object_positive.init)
+        })
+        output$res_neg_mod = renderPrint({
+          if(is.null(prj_init$object_negative.init)){return()}
+          print(prj_init$object_negative.init)
+        })
+
       }
     )
   })

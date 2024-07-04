@@ -26,3 +26,4 @@ run_tidyfood_shiny <- function(
     golem_opts = list(...)
   )
 }
+

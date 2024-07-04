@@ -17,5 +17,4 @@ app_server <- function(input, output, session) {
   #> project init
   prj_init <- reactiveValues(data = NULL) # project init
   project_init_server(id = "project_init_id",volumes = volumes,prj_init)
-  project_init_server(id = "project_restart_id",volumes = volumes,prj_init)
 }
