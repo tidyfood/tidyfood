@@ -11,7 +11,7 @@ app_ui <- function(request) {
     golem_add_external_resources(),
     # Your application UI logic
     page_navbar(
-      theme = bs_theme(bootswatch = "pulse"),
+      theme = bs_theme(bootswatch = "lumen"),
       title = "Tidyfood",
       homepage_ui("home_id"),
       project_init_ui("project_init_id"),

@@ -101,7 +101,11 @@ project_init_ui <- function(id) {
           full_screen = T,
           height = 300,
           card_header(
-            "File check"
+            "File check",
+            tooltip(
+              bs_icon("info-circle"),
+              "Please note, this step is essential!"
+            )
           ),
           card_body(
             fill = FALSE,gap = 0,
