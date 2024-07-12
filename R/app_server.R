@@ -17,4 +17,12 @@ app_server <- function(input, output, session) {
   #> project init
   prj_init <- reactiveValues(data = NULL) # project init
   project_init_server(id = "project_init_id",volumes = volumes,prj_init)
+  #> data import
+  data_import_rv <- reactiveValues(data = NULL)
+  data_import_raw_server(
+    id = "data_import_raw_id",
+    volumes = volumes,
+    prj_init = prj_init,
+    data_import_rv = data_import_rv
+  )
 }

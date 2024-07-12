@@ -16,7 +16,10 @@ app_ui <- function(request) {
       homepage_ui("home_id"),
       project_init_ui("project_init_id"),
       nav_menu(
-        title = 'Data Cleaning',icon = bs_icon("wind"),
+        title = 'Data import',icon = bs_icon("upload"),
+        data_import_raw_ui("data_import_raw_id"),
+        # data_import_tbl_ui("data_import_tbl_id"),
+        # data_import_massdataset_ui("data_import_massdataset_id")
       ),
 
       )
