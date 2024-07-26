@@ -125,7 +125,7 @@ data_import_raw_ui <- function(id) {
       nav_panel(
         title = "File check",
         icon = bsicons::bs_icon("inbox"),
-        actionButton(ns('action1'),'1. Check input file',icon = icon("computer-mouse")),
+        actionButton(ns('action1'),'1. Check input file',icon = icon("computer-mouse"),width = "15%"),
         hr_head(),
         card(
           full_screen = T,
@@ -138,7 +138,7 @@ data_import_raw_ui <- function(id) {
         hr_head(),
         layout_column_wrap(
           width = 1/2,
-          height = 300,
+          height = 350,
           card(
             full_screen = T,
             height = 350,
@@ -160,8 +160,8 @@ data_import_raw_ui <- function(id) {
     nav_panel(
       title = "Import from raw data",
       icon = bsicons::bs_icon("inbox"),
-      actionButton(ns('action2'),'2. Star peak picking',icon = icon("computer-mouse"),width = "30%"),
-      hr_main(),
+      actionButton(ns('action2'),'2. Star peak picking',icon = icon("computer-mouse"),width = "15%"),
+      hr_head(),
       card(
         full_screen = T,
         height = 350,
@@ -170,10 +170,10 @@ data_import_raw_ui <- function(id) {
         ),
         DT::dataTableOutput(ns("para_clean_tbl"))
       ),
+      hr_head(),
       layout_column_wrap(
         width = 1/2,
-        height = 300,
-        hr_main(),
+        height = 350,
         card(
           full_screen = T,
           height = 350,
