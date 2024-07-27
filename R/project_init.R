@@ -333,15 +333,26 @@ project_init_server <- function(id,volumes,prj_init) {
 
         }
 
-        #      print(init_status)
         output$file_check_init = renderUI({
-          isolate(HTML(paste0(
-            '<font color = blue> <b>The working directory: </b> </font> <font color=orange> ',prj_init$wd,' </font><br/>',
-            '<font color = blue> <b>The sample information: </b> </font> <font color=orange> ',paste(sample_info_col(),collapse = " | "),' </font><br/>',
-            init_re_start_step,
-            init_status,
-            init_db_file_check
-          )))
+          isolate(HTML(
+            paste0(
+              '<link rel="stylesheet" type="text/css" href="style.css" />',
+
+              '<div class="info-block">',
+              '  <div>',
+              '    <span class="info-label">The working directory:</span>',
+              '    <span class="info-value">', prj_init$wd, '</span>',
+              '  </div>',
+              '  <div>',
+              '    <span class="info-label">The sample information:</span>',
+              '    <span class="info-value">', paste(sample_info_col(), collapse = ", "), '</span>',
+              '  </div>',
+              '  <div>', init_re_start_step, '</div>',
+              '  <div>', init_status, '</div>',
+              '  <div>', init_db_file_check, '</div>',
+              '</div>'
+            )
+          ))
         })
         #> status
         #> information of mass datasets

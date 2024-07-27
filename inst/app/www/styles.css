@@ -5,3 +5,19 @@
   width: 100%;
   word-wrap: break-word;
 }
+
+.info-block {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-family: Arial, sans-serif;
+}
+
+.info-label {
+  color: blue;
+  font-weight: bold;
+}
+
+.info-value {
+  color: orange;
+}

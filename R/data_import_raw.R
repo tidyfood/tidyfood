@@ -129,7 +129,7 @@ data_import_raw_ui <- function(id) {
         hr_head(),
         card(
           full_screen = T,
-          height = 350,
+          height = 150,
           card_header(
             "Summary"
           ),
@@ -162,21 +162,12 @@ data_import_raw_ui <- function(id) {
       icon = bsicons::bs_icon("inbox"),
       actionButton(ns('action2'),'2. Star peak picking',icon = icon("computer-mouse"),width = "15%"),
       hr_head(),
-      card(
-        full_screen = T,
-        height = 350,
-        card_header(
-          "Peak picking parameters"
-        ),
-        DT::dataTableOutput(ns("para_clean_tbl"))
-      ),
-      hr_head(),
       layout_column_wrap(
         width = 1/2,
-        height = 350,
+        height = 700,
         card(
           full_screen = T,
-          height = 350,
+          height = 700,
           card_header(
             "Positive model"
           ),
@@ -184,13 +175,22 @@ data_import_raw_ui <- function(id) {
         ),
         card(
           full_screen = T,
-          height = 350,
+          height = 700,
           card_header(
             "Negative model"
           ),
           verbatimTextOutput(ns("obj_mass_check.neg"))
         )
-      )
+      ),
+      hr_head(),
+      card(
+        full_screen = T,
+        height = 200,
+        card_header(
+          "Peak picking parameters"
+        ),
+        DT::dataTableOutput(ns("para_clean_tbl"))
+      ),
     )
     )
     )
@@ -355,11 +355,34 @@ data_import_raw_server <- function(id,volumes,prj_init,data_import_rv) {
         print(temp_tbl_ms2)
 
         #> MS1 information
+        # output$file_check1 = renderUI({
+        #   isolate(HTML(paste0(
+        #     '<font color = blue> <b>The number of QC files: </b> </font>Positive model: <font color=red>(',para_data_check$QC_number.p |> length(),' | ',para_data_check$QC_number.p2 |> length(),')</font> Negative model: <font color=red>(',para_data_check$QC_number.n |> length(),' | ',para_data_check$QC_number.n2 |> length(),')</font><br/>',
+        #     '<font color = blue> <b>The the number of Subject files: </b> </font>Positive model: <font color=red>(',para_data_check$S_number.p |> length(),' | ',para_data_check$S_number.p2 |> length(), ')</font> Negative model: <font color=red>(',para_data_check$S_number.n |> length(),' | ',para_data_check$S_number.n2 |> length(),')</font><br/>'
+        #   )))
+        # })
         output$file_check1 = renderUI({
-          isolate(HTML(paste0(
-            '<font color = blue> <b>The number of QC files: </b> </font>Positive model: <font color=red>(',para_data_check$QC_number.p |> length(),' | ',para_data_check$QC_number.p2 |> length(),')</font> Negative model: <font color=red>(',para_data_check$QC_number.n |> length(),' | ',para_data_check$QC_number.n2 |> length(),')</font><br/>',
-            '<font color = blue> <b>The the number of Subject files: </b> </font>Positive model: <font color=red>(',para_data_check$S_number.p |> length(),' | ',para_data_check$S_number.p2 |> length(), ')</font> Negative model: <font color=red>(',para_data_check$S_number.n |> length(),' | ',para_data_check$S_number.n2 |> length(),')</font><br/>'
-          )))
+          isolate(HTML(
+            paste0(
+
+              '<div class="info-block">',
+              '  <div>',
+              '    <span class="info-label">The number of QC files:</span>',
+              '    <span class="info-value">',
+              '      Positive model: <font color="red">(', para_data_check$QC_number.p |> length(), ' | ', para_data_check$QC_number.p2 |> length(), ')</font>',
+              '      Negative model: <font color="red">(', para_data_check$QC_number.n |> length(), ' | ', para_data_check$QC_number.n2 |> length(), ')</font>',
+              '    </span>',
+              '  </div>',
+              '  <div>',
+              '    <span class="info-label">The number of Subject files:</span>',
+              '    <span class="info-value">',
+              '      Positive model: <font color="red">(', para_data_check$S_number.p |> length(), ' | ', para_data_check$S_number.p2 |> length(), ')</font>',
+              '      Negative model: <font color="red">(', para_data_check$S_number.n |> length(), ' | ', para_data_check$S_number.n2 |> length(), ')</font>',
+              '    </span>',
+              '  </div>',
+              '</div>'
+            )
+          ))
         })
       }
     )
@@ -501,6 +524,7 @@ data_import_raw_server <- function(id,volumes,prj_init,data_import_rv) {
             paste0(prj_init$wd,"/Result/NEG"), '</a>'
           )))
         })
+
         #> add ms2 data
         output$para_clean_tbl = renderDataTable_formated(
           actions = input$action2,
