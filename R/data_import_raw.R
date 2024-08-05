@@ -127,14 +127,7 @@ data_import_raw_ui <- function(id) {
         icon = bsicons::bs_icon("inbox"),
         actionButton(ns('action1'),'1. Check input file',icon = icon("computer-mouse"),width = "15%"),
         hr_head(),
-        card(
-          full_screen = T,
-          height = 150,
-          card_header(
-            "Summary"
-          ),
-          htmlOutput(ns("file_check1"))
-        ),
+        htmlOutput(ns("file_check1")),
         hr_head(),
         layout_column_wrap(
           width = 1/2,

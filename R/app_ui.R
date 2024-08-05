@@ -18,8 +18,8 @@ app_ui <- function(request) {
       nav_menu(
         title = 'Data import',icon = bs_icon("upload"),
         data_import_raw_ui("data_import_raw_id"),
-        # data_import_tbl_ui("data_import_tbl_id"),
-        # data_import_massdataset_ui("data_import_massdataset_id")
+        data_import_tbl_ui("data_import_tbl_id"),
+        data_import_massdataset_ui("data_import_massdataset_id")
       ),
 
       )

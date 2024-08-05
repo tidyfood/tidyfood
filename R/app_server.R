@@ -25,4 +25,19 @@ app_server <- function(input, output, session) {
     prj_init = prj_init,
     data_import_rv = data_import_rv
   )
+  ##> from peak picking table
+  data_import_tbl_server(
+    id = "data_import_tbl_id",
+    volumes = volumes,
+    prj_init = prj_init,
+    data_import_rv = data_import_rv
+  )
+
+  ##> from peak picking table
+  data_import_massdataset_server(
+    id = "data_import_massdataset_id",
+    volumes = volumes,
+    prj_init = prj_init,
+    data_import_rv = data_import_rv
+  )
 }
