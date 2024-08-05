@@ -16,7 +16,7 @@ data_import_massdataset_ui <- function(id) {
     title = 'Start with mass_dataset',
     icon = bs_icon("upload"),
     navs_tab_card(
-      title = "upload file",
+      title = "Start with mass_dataset",
       sidebar = sidebar(
         shinyFilesButton(
           id = ns('Pos_obj_mass'),buttonType = "default",title = "load mass dataset object (positive) ",

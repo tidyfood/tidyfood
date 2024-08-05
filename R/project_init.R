@@ -57,6 +57,10 @@ project_init_ui <- function(id) {
           selectInput(
             inputId = ns("batch_raw"),label = "batch",choices = c("sample_id",'injection.order',"class","group","batch"),
             selected = "batch",multiple = FALSE
+          ),
+          radioButtons(
+            inputId = ns("init_ion"),label = "Ion model",choices = c("Positive","Negative","Both"),
+            selected = "Both"
           )
         ),
         accordion_panel(
@@ -97,28 +101,10 @@ project_init_ui <- function(id) {
       nav_panel(
         title = "Setting working directory",
         icon = bsicons::bs_icon("power"),
-        card(
-          full_screen = T,
-          height = 300,
-          card_header(
-            "File check",
-            tooltip(
-              bs_icon("info-circle"),
-              "Please note, this step is essential!"
-            )
-          ),
-          card_body(
-            fill = FALSE,gap = 0,
-            actionButton(inputId = ns('action_init'),'Initialize project',icon = icon("play"), style = "width: 200px;"),
-            hr_head(),
-            ),
-          htmlOutput(outputId = ns("file_check_init")),
-          card_body(
-            fill = FALSE, gap = 0,
-            card_title("Attention!",style = "color: orange;"),
-            p(class = "text-muted", "Please ensure that the file check results are correct before proceeding with further analysis.")
-          )
-        ),
+        actionButton(inputId = ns('action_init'),'Initialize project',icon = icon("play"), style = "width: 200px;"),
+        tags$h3("Summary of input file",style = 'color: #008080'),
+        hr_head(),
+        htmlOutput(outputId = ns("file_check_init")),
         card(
           full_screen = T,
           height = 350,
@@ -241,6 +227,7 @@ project_init_server <- function(id,volumes,prj_init) {
       {
         if(is.null(input$prj_wd)){return()}
         if(is.null(input$SampleInfo)){return()}
+        prj_init$ion_model <- as.character(input$init_ion)
         #> working dir path
         prj_init$wd_path <- parseDirPath(volumes, input$prj_wd)
         prj_init$wd <- prj_init$wd_path |> as.character()
@@ -342,6 +329,10 @@ project_init_server <- function(id,volumes,prj_init) {
               '  <div>',
               '    <span class="info-label">The working directory:</span>',
               '    <span class="info-value">', prj_init$wd, '</span>',
+              '  </div>',
+              '  <div>',
+              '    <span class="info-label">Selected Ion model:</span>',
+              '    <span class="info-value">', prj_init$ion_model, '</span>',
               '  </div>',
               '  <div>',
               '    <span class="info-label">The sample information:</span>',

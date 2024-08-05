@@ -16,7 +16,7 @@ data_import_raw_ui <- function(id) {
     title = 'Start with MS file',
     icon = bs_icon("upload"),
     navset_card_tab(
-      title = "Upload file",
+      title = "Start with MS file",
       sidebar = accordion(
         accordion_panel(
           title = "MS files",

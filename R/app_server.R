@@ -40,4 +40,14 @@ app_server <- function(input, output, session) {
     prj_init = prj_init,
     data_import_rv = data_import_rv
   )
+
+  #> Data clean
+  data_clean_rv <- reactiveValues(data = NULL)
+  data_overview_server(
+    id = "data_overview_id",
+    volumes = volumes,
+    prj_init = prj_init,
+    data_import_rv = data_import_rv,
+    data_clean_rv = data_clean_rv
+  )
 }

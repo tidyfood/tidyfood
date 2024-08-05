@@ -16,7 +16,7 @@ data_import_tbl_ui <- function(id) {
     title = 'Start with table file',
     icon = bs_icon("upload"),
     navs_tab_card(
-      title = "upload file",
+      title = "Start with table file",
       sidebar = sidebar(
         fileInput(
           inputId = ns('expmat'),
