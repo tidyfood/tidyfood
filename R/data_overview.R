@@ -15,183 +15,191 @@
 data_overview_ui <- function(id) {
   ns <- NS(id)
     nav_panel(
-      title = 'Overview',
-      icon = icon("scale-balanced"),
-      actionButton(inputId = ns('data_clean_start'),label = "Start",icon = icon("play")),
-      materialSwitch(inputId = ns("data_clean_plt_format"),label = "Interactive plot", status = "primary"),
-      actionButton(inputId = ns('generate_report_raw'),label = "Export report",icon = icon("save")),
-      hr_head(),
-      layout_column_wrap(
-        width = 1/2,
-        height = 350,
-        navset_card_tab(
-          height = 350,
-          full_screen = TRUE,
-          title = "Peak distribution",
-          nav_panel(
-            "Positive",
-            card_title("Peak distribution plot in positive model"),
-            uiOutput(ns("summary_pd_plt.pos"),fill = T)
-          ),
-          nav_panel(
-            "Negative",
-            card_title("Peak distribution plot in negative model"),
-            uiOutput(ns("summary_pd_plt.neg"),fill = T)
-
-          )
-        ),
-        navset_card_tab(
-          height = 350,
-          full_screen = TRUE,
-          title = "Check missing value",
-          nav_panel(
-            "Positive",
-            card_title("Missing value summary in positive model"),
-            uiOutput(ns("summary_mvs_plt.pos"),fill = T)
-
-          ),
-          nav_panel(
-            "Negative",
-            card_title("Missing value summary in negative model"),
-            uiOutput(ns("summary_mvs_plt.neg"),fill = T)
-
-          ),
-          nav_panel(
-            shiny::icon("circle-info"),
-            markdown("Interactivecomplexheatmap DO NOT work when shiny version > 1.7.5 [issue](https://github.com/jokergoo/InteractiveComplexHeatmap/issues/114)")
-          )
-        )),
-      layout_column_wrap(
-        width = 1/2,
-        height = 350,
-        navset_card_tab(
-          height = 350,
-          full_screen = TRUE,
-          title = "Missing value in samples",
+        title = 'Overview',
+        icon = icon("scale-balanced"),
+        layout_sidebar(
           sidebar = sidebar(
-            id = ns("summ_mv_sidebar"),
-            open = 'closed',
-            selectInput(
-              inputId = ns("mv_color_by"),label = "color by",
-              choices = c("class","group","..."),selected = "class",
-              multiple = F
-            )
+            title = "Actions",
+            actionButton(inputId = ns('data_clean_start'),label = "Start",icon = icon("play")),
+            materialSwitch(inputId = ns("data_clean_plt_format"),label = "Interactive plot", status = "primary"),
+            actionButton(inputId = ns('generate_report_raw'),label = "Export report",icon = icon("save")),
           ),
-          nav_panel(
-            "Positive",
-            card_title("MV percentage (sample) in positive model"),
-            uiOutput(ns("summary_mvp.s_plt.pos"),fill = T)
+          page_fluid(
+            layout_column_wrap(
+              width = 1/2,
+              height = 350,
+              navset_card_tab(
+                height = 350,
+                full_screen = TRUE,
+                title = "Peak distribution",
+                nav_panel(
+                  "Positive",
+                  card_title("Peak distribution plot in positive model"),
+                  uiOutput(ns("summary_pd_plt.pos"),fill = T)
+                ),
+                nav_panel(
+                  "Negative",
+                  card_title("Peak distribution plot in negative model"),
+                  uiOutput(ns("summary_pd_plt.neg"),fill = T)
 
-          ),
-          nav_panel(
-            "Negative",
-            card_title("MV percentage (sample) in negative model"),
-            uiOutput(ns("summary_mvp.s_plt.neg"),fill = T)
+                )
+              ),
+              navset_card_tab(
+                height = 350,
+                full_screen = TRUE,
+                title = "Check missing value",
+                nav_panel(
+                  "Positive",
+                  card_title("Missing value summary in positive model"),
+                  uiOutput(ns("summary_mvs_plt.pos"),fill = T)
 
-          )
-          ),
+                ),
+                nav_panel(
+                  "Negative",
+                  card_title("Missing value summary in negative model"),
+                  uiOutput(ns("summary_mvs_plt.neg"),fill = T)
 
-        navset_card_tab(
-          height = 350,
-          full_screen = TRUE,
-          title = "Missing value in variables",
-          nav_panel(
-            "Positive",
-            card_title("MV percentage (variable) in positive model"),
-            uiOutput(ns("summary_mvp.v_plt.pos"),fill = T)
+                ),
+                nav_panel(
+                  shiny::icon("circle-info"),
+                  markdown("Interactivecomplexheatmap DO NOT work when shiny version > 1.7.5 [issue](https://github.com/jokergoo/InteractiveComplexHeatmap/issues/114)")
+                )
+              )),
+            layout_column_wrap(
+              width = 1/2,
+              height = 350,
+              navset_card_tab(
+                height = 350,
+                full_screen = TRUE,
+                title = "Missing value in samples",
+                sidebar = sidebar(
+                  id = ns("summ_mv_sidebar"),
+                  open = 'closed',
+                  selectInput(
+                    inputId = ns("mv_color_by"),label = "color by",
+                    choices = c("class","group","..."),selected = "class",
+                    multiple = F
+                  )
+                ),
+                nav_panel(
+                  "Positive",
+                  card_title("MV percentage (sample) in positive model"),
+                  uiOutput(ns("summary_mvp.s_plt.pos"),fill = T)
 
-          ),
-          nav_panel(
-            "Negative",
-            card_title("MV percentage (variable) in positive model"),
-            uiOutput(ns("summary_mvp.v_plt.neg"),fill = T)
+                ),
+                nav_panel(
+                  "Negative",
+                  card_title("MV percentage (sample) in negative model"),
+                  uiOutput(ns("summary_mvp.s_plt.neg"),fill = T)
 
-          )
-        )),
-      layout_column_wrap(
-        width = 1/2,
-        height = 350,
-        navset_card_tab(
-          height = 350,
-          full_screen = TRUE,
-          title = "RSD distribution",
-          nav_panel(
-            "Positive",
-            card_title("RSD distribution in positive model"),
-            uiOutput(ns("summary_rsd_plt.pos"),fill = T)
+                )
+              ),
 
-          ),
-          nav_panel(
-            "Negative",
-            card_title("RSD distribution in negative model"),
-            uiOutput(ns("summary_rsd_plt.neg"),fill = T)
+              navset_card_tab(
+                height = 350,
+                full_screen = TRUE,
+                title = "Missing value in variables",
+                nav_panel(
+                  "Positive",
+                  card_title("MV percentage (variable) in positive model"),
+                  uiOutput(ns("summary_mvp.v_plt.pos"),fill = T)
 
-          )
-        ),
-        navset_card_tab(
-            height = 350,
-            full_screen = TRUE,
-            title = "Intensity for all the variables",
-            sidebar = sidebar(
-              id = ns("summ_Intensity_sidebar"),
-              open = 'closed',
-              selectInput(
-                inputId = ns("boxplot_color_by"),label = "color by",
-                choices = c("class","group","..."),selected = "batch",
-                multiple = F
+                ),
+                nav_panel(
+                  "Negative",
+                  card_title("MV percentage (variable) in positive model"),
+                  uiOutput(ns("summary_mvp.v_plt.neg"),fill = T)
+
+                )
+              )),
+            layout_column_wrap(
+              width = 1/2,
+              height = 350,
+              navset_card_tab(
+                height = 350,
+                full_screen = TRUE,
+                title = "RSD distribution",
+                nav_panel(
+                  "Positive",
+                  card_title("RSD distribution in positive model"),
+                  uiOutput(ns("summary_rsd_plt.pos"),fill = T)
+
+                ),
+                nav_panel(
+                  "Negative",
+                  card_title("RSD distribution in negative model"),
+                  uiOutput(ns("summary_rsd_plt.neg"),fill = T)
+
+                )
+              ),
+              navset_card_tab(
+                height = 350,
+                full_screen = TRUE,
+                title = "Intensity for all the variables",
+                sidebar = sidebar(
+                  id = ns("summ_Intensity_sidebar"),
+                  open = 'closed',
+                  selectInput(
+                    inputId = ns("boxplot_color_by"),label = "color by",
+                    choices = c("class","group","..."),selected = "batch",
+                    multiple = F
+                  )
+                ),
+                nav_panel(
+                  "Positive",
+                  card_title("boxplot in positive model"),
+                  uiOutput(ns("summary_box_plt.pos"),fill = T)
+
+                ),
+                nav_panel(
+                  "Negative",
+                  card_title("boxplot in negative model"),
+                  uiOutput(ns("summary_box_plt.neg"),fill = T)
+
+                )
+              )),
+            layout_column_wrap(
+              width = 1/2,
+              height = 350,
+              navset_card_tab(
+                height = 350,
+                full_screen = TRUE,
+                title = "PCA",
+                nav_panel(
+                  "Positive",
+                  card_title("PCA plot in positive model"),
+                  uiOutput(ns("summary_pca_plt.pos"),fill = T)
+
+                ),
+                nav_panel(
+                  "Negative",
+                  card_title("PCA plot in negative model"),
+                  uiOutput(ns("summary_pca_plt.neg"),fill = T)
+
+                )
+              ),
+              navset_card_tab(
+                height = 350,
+                full_screen = TRUE,
+                title = "Sample correlation",
+                nav_panel(
+                  "Positive",
+                  card_title("Sample correlation in positive model"),
+                  uiOutput(ns("summary_corr_plt.pos"),fill = T)
+
+                ),
+                nav_panel(
+                  "Negative",
+                  card_title("Sample correlation in negative model"),
+                  uiOutput(ns("summary_corr_plt.neg"),fill = T)
+
+                )
               )
-            ),
-            nav_panel(
-              "Positive",
-              card_title("boxplot in positive model"),
-              uiOutput(ns("summary_box_plt.pos"),fill = T)
-
-            ),
-            nav_panel(
-              "Negative",
-              card_title("boxplot in negative model"),
-              uiOutput(ns("summary_box_plt.neg"),fill = T)
-
             )
-          )),
-      layout_column_wrap(
-        width = 1/2,
-        height = 350,
-          navset_card_tab(
-            height = 350,
-            full_screen = TRUE,
-            title = "PCA",
-            nav_panel(
-              "Positive",
-              card_title("PCA plot in positive model"),
-              uiOutput(ns("summary_pca_plt.pos"),fill = T)
-
-            ),
-            nav_panel(
-              "Negative",
-              card_title("PCA plot in negative model"),
-              uiOutput(ns("summary_pca_plt.neg"),fill = T)
-
-            )
-          ),
-        navset_card_tab(
-          height = 350,
-          full_screen = TRUE,
-          title = "Sample correlation",
-          nav_panel(
-            "Positive",
-            card_title("Sample correlation in positive model"),
-            uiOutput(ns("summary_corr_plt.pos"),fill = T)
-
-          ),
-          nav_panel(
-            "Negative",
-            card_title("Sample correlation in negative model"),
-            uiOutput(ns("summary_corr_plt.neg"),fill = T)
-
           )
         )
-        )
+
+
       )
 }
 
@@ -217,17 +225,6 @@ data_overview_ui <- function(id) {
 data_overview_server <- function(id,volumes,prj_init,data_import_rv,data_clean_rv) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    observeEvent(input$toggleSidebar, {
-      shinyjs::toggle(id = "Sidebar")
-    })
-    #> reupload sample info
-    update_sample_info <- reactive({
-      file1 <- input$re_upload_sample_info
-      if(is.null(file1)){return()}
-      read.csv(file = file1$datapath,
-               sep=",",header = T,stringsAsFactors = F)
-    })
-
     p2_dataclean <- reactiveValues(data = NULL)
 
     observe({
@@ -258,28 +255,6 @@ data_overview_server <- function(id,volumes,prj_init,data_import_rv,data_clean_r
           activate_mass_dataset('sample_info') %>%
           dplyr::select(sample_id) %>%
           dplyr::left_join(prj_init$sample_info)
-
-        ##> update sample info
-        observeEvent(
-          input$data_clean_reupload_si,
-          {
-            if(is.null(input$re_upload_sample_info)){return()}
-            if(is.null(prj_init$sample_info)){return()}
-            p2_dataclean$temp_sample_info =prj_init$sample_info%>% as.data.frame()
-
-            p2_dataclean$object_pos <-
-              p2_dataclean$object_pos %>%
-              activate_mass_dataset('sample_info') %>%
-              select(sample_id) %>%
-              left_join(p2_dataclean$temp_sample_info)
-
-            p2_dataclean$object_neg <-
-              p2_dataclean$object_neg %>%
-              activate_mass_dataset('sample_info') %>%
-              select(sample_id) %>%
-              left_join(p2_dataclean$temp_sample_info)
-          }
-        )
 
         #> color key of missing value
         p2_dataclean$color_key_batch = input$data_clean_col_key

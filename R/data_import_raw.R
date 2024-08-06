@@ -15,8 +15,7 @@ data_import_raw_ui <- function(id) {
   nav_panel(
     title = 'Start with MS file',
     icon = bs_icon("upload"),
-    navset_card_tab(
-      title = "Start with MS file",
+    layout_sidebar(
       sidebar = accordion(
         accordion_panel(
           title = "MS files",
@@ -61,11 +60,11 @@ data_import_raw_ui <- function(id) {
           ),
           hr_head(),
           textInput(
-            inputId = ns('pre_left'),label = 'prefilter min',value = 3
+            inputId = ns('pre_left'),label = 'prefilter peaks',value = 3
           ),
           hr_head(),
           textInput(
-            inputId = ns('pre_right'),label = 'prefilter max',value = 500
+            inputId = ns('pre_right'),label = 'prefilter intensity',value = 500
           ),
           hr_head(),
           selectInput(
@@ -122,72 +121,90 @@ data_import_raw_ui <- function(id) {
           )
         )
       ),
-      nav_panel(
-        title = "File check",
-        icon = bsicons::bs_icon("inbox"),
-        actionButton(ns('action1'),'1. Check input file',icon = icon("computer-mouse"),width = "15%"),
-        hr_head(),
-        htmlOutput(ns("file_check1")),
-        hr_head(),
-        layout_column_wrap(
-          width = 1/2,
-          height = 350,
+      page_fluid(
+        nav_panel(
+          title = "File check",
+          icon = bsicons::bs_icon("inbox"),
+          actionButton(ns('action1'),'1. Check input file',icon = icon("computer-mouse"),width = "15%"),
+          htmlOutput(ns("file_check1")),
+          navset_card_tab(
+            height = 350,
+            full_screen = TRUE,
+            title = "Input file list",
+            nav_panel(
+              "MS1",
+              card_title(".mzxml file list (MS1)"),
+              DT::dataTableOutput(ns("tbl_ms1"))
+            ),
+            nav_panel(
+              "MS2",
+              card_title(".mgf file list (MS2)"),
+              DT::dataTableOutput(ns("tbl_ms2"))
+            )
+          ),
+          tags$h3("Optimize peak picking parameters",style = 'color: #008080'),
+          navset_card_tab(
+            height = 700,
+            full_screen = TRUE,
+            title = "optimize peak picking parameters (option)",
+            nav_panel(
+            title =    "Step1",
+              card_header("Choose ppmCut"),
+              layout_sidebar(
+                sidebar = sidebar(
+                  textInput(inputId = ns("massSDrange.1"),label = "massSDrange",value = 2),
+                  textInput(inputId = ns("smooth.1"),label = "smooth",value = 0),
+                  textInput(inputId = ns("cutoff.1"),label = "cutoff",value = 0.95),
+                  radioButtons(inputId = ns("filenum.1"),label = "filenum",choices = c(3,5,"all"),selected = 3),
+                  actionButton(ns('action3'),'Start',icon = icon("computer-mouse")),
+                ),
+                plotOutput(outputId = ns("ppmCut_plt"))
+              )
+            ),
+            nav_panel(
+            title =    "Step2",
+              card_header("Recommanded parameters"),
+                  layout_sidebar(
+                    sidebar = sidebar(
+                      textInput(inputId = ns("massSDrange.2"),label = "massSDrange",value = 2),
+                      textInput(inputId = ns("smooth.2"),label = "smooth",value = 0),
+                      textInput(inputId = ns("cutoff.2"),label = "cutoff",value = 0.95),
+                      radioButtons(inputId = ns("filenum.2"),label = "filenum",choices = c(3,5,"all"),selected = 3),
+                      actionButton(ns('action4'),'Start',icon = icon("computer-mouse")),
+                    ),
+                    DT::dataTableOutput(ns("parameters_opt")),
+                    radioButtons(inputId = ns("para_choise"),label = "use optimized parameters",choices = c("yes","no"),selected = "yes")
+                  )
+            )
+          ),
+          actionButton(ns('action2'),'2. Star peak picking',icon = icon("computer-mouse"),width = "15%"),
+          navset_card_tab(
+            height = 350,
+            full_screen = TRUE,
+            title = "Status",
+            nav_panel(
+              "Positive",
+              card_title("Positive model"),
+              verbatimTextOutput(ns("obj_mass_check.pos"))
+            ),
+            nav_panel(
+              "Negative",
+              card_title("Negative model"),
+              verbatimTextOutput(ns("obj_mass_check.neg"))
+            )
+          ),
           card(
             full_screen = T,
             height = 350,
             card_header(
-              ".mzxml file list (MS1)"
+              "Peak picking parameters"
             ),
-            DT::dataTableOutput(ns("tbl_ms1"))
-          ),
-          card(
-            full_screen = T,
-            height = 350,
-            card_header(
-              ".mgf file list (MS2)"
-            ),
-            DT::dataTableOutput(ns("tbl_ms2"))
+            DT::dataTableOutput(ns("para_clean_tbl"))
           )
-          )
-    ),
-    nav_panel(
-      title = "Import from raw data",
-      icon = bsicons::bs_icon("inbox"),
-      actionButton(ns('action2'),'2. Star peak picking',icon = icon("computer-mouse"),width = "15%"),
-      hr_head(),
-      layout_column_wrap(
-        width = 1/2,
-        height = 700,
-        card(
-          full_screen = T,
-          height = 700,
-          card_header(
-            "Positive model"
-          ),
-          verbatimTextOutput(ns("obj_mass_check.pos"))
-        ),
-        card(
-          full_screen = T,
-          height = 700,
-          card_header(
-            "Negative model"
-          ),
-          verbatimTextOutput(ns("obj_mass_check.neg"))
         )
-      ),
-      hr_head(),
-      card(
-        full_screen = T,
-        height = 200,
-        card_header(
-          "Peak picking parameters"
-        ),
-        DT::dataTableOutput(ns("para_clean_tbl"))
-      ),
+      )
     )
     )
-    )
-
 }
 
 
@@ -201,6 +218,7 @@ data_import_raw_ui <- function(id) {
 #' @importFrom shinyFiles shinyDirChoose parseDirPath parseFilePaths
 #' @importFrom massprocesser process_data
 #' @importFrom massdataset mutate_ms2
+#' @import patchwork
 #' @param id module of server
 #' @param volumes shinyFiles volumes
 #' @param prj_init use project init variables.
@@ -268,7 +286,32 @@ data_import_raw_server <- function(id,volumes,prj_init,data_import_rv) {
       }})
 
 
+
+
     #> File check
+    #> ##> default
+    output$file_check1 = renderUI({
+      isolate(HTML(
+        paste0(
+          '<div class="info-block">',
+          '  <div>',
+          '    <span class="info-label">The number of QC files:</span>',
+          '    <span class="info-value">',
+          '      Positive model: <font color="red">(', ')</font>',
+          '      Negative model: <font color="red">(', ')</font>',
+          '    </span>',
+          '  </div>',
+          '  <div>',
+          '    <span class="info-label">The number of Subject files:</span>',
+          '    <span class="info-value">',
+          '      Positive model: <font color="red">(',')</font>',
+          '      Negative model: <font color="red">(',')</font>',
+          '    </span>',
+          '  </div>',
+          '</div>'
+        )
+      ))
+    })
     para_data_check <- reactiveValues(data = NULL)
     observeEvent(
       input$action1,
@@ -288,7 +331,7 @@ data_import_raw_server <- function(id,volumes,prj_init,data_import_rv) {
         para_data_check$S_number.n <- list.files(paste0(para_data_check$MS1_path,"/NEG/Subject"))
         para_data_check$S_number.p <- list.files(paste0(para_data_check$MS1_path,"/POS/Subject"))
 
-        print('check point 02')
+
 
 
         #> MS2 data file
@@ -335,7 +378,6 @@ data_import_raw_server <- function(id,volumes,prj_init,data_import_rv) {
                        length(para_data_check$S_number.p2)))
         )
 
-        print('check point 03')
 
         output$tbl_ms2 =
           renderDataTable_formated(actions = input$action1,
@@ -345,19 +387,10 @@ data_import_raw_server <- function(id,volumes,prj_init,data_import_rv) {
                                    condition4 = para_data_check$S_number.p,
                                    tbl = temp_tbl_ms2,filename.a = "3.3.rawDataImport_summary_of_ms2_file")
 
-        print(temp_tbl_ms2)
 
-        #> MS1 information
-        # output$file_check1 = renderUI({
-        #   isolate(HTML(paste0(
-        #     '<font color = blue> <b>The number of QC files: </b> </font>Positive model: <font color=red>(',para_data_check$QC_number.p |> length(),' | ',para_data_check$QC_number.p2 |> length(),')</font> Negative model: <font color=red>(',para_data_check$QC_number.n |> length(),' | ',para_data_check$QC_number.n2 |> length(),')</font><br/>',
-        #     '<font color = blue> <b>The the number of Subject files: </b> </font>Positive model: <font color=red>(',para_data_check$S_number.p |> length(),' | ',para_data_check$S_number.p2 |> length(), ')</font> Negative model: <font color=red>(',para_data_check$S_number.n |> length(),' | ',para_data_check$S_number.n2 |> length(),')</font><br/>'
-        #   )))
-        # })
         output$file_check1 = renderUI({
           isolate(HTML(
             paste0(
-
               '<div class="info-block">',
               '  <div>',
               '    <span class="info-label">The number of QC files:</span>',
@@ -379,6 +412,164 @@ data_import_raw_server <- function(id,volumes,prj_init,data_import_rv) {
         })
       }
     )
+    #> optimize parameter
+    #>
+    data_para_opt <- reactiveValues(data = NULL)
+    observeEvent(
+      input$action3,
+      {
+        if(is.null(input$MS1)){return()}
+        if(is.null(para_data_check$MS1_path)){return()}
+        pro_optimize_step1 = c(
+          'running positive model ...',
+          'running negative model ...',
+          'All finish'
+        )
+        if(file.exists(paste0(para_data_check$MS1_path,"/POS/QC/ppmCut.xlsx")) &
+           file.exists(paste0(para_data_check$MS1_path,"/POS/QC/ppmCut.xlsx"))
+           ){
+
+          withProgress(message = 'Test ppm cutoff',value = 0,
+                       expr = {
+                         for (i in 1:3) {
+                           incProgress(1/3,detail = pro_optimize_step1[i])
+                           if(i == 1) {
+                             data_para_opt$ppmCut.p = readxl::read_xlsx(paste0(para_data_check$MS1_path,"/POS/QC/ppmCut.xlsx")) %>% pull(ppmCut) %>% as.numeric()
+                           } else if(i == 2) {
+                             data_para_opt$ppmCut.n = readxl::read_xlsx(paste0(para_data_check$MS1_path,"/NEG/QC/ppmCut.xlsx")) %>% pull(ppmCut) %>% as.numeric()
+                           } else if (i == 3) {
+                             print("already done, use previous saved ppmCut")
+                           }
+                         }
+                         })
+
+        } else {
+          massSDrange = input$massSDrange.1 %>% as.numeric()
+          smooth = input$smooth.1 %>% as.numeric()
+          cutoff = input$cutoff.1 %>% as.numeric()
+          filenum = input$filenum.1 %>% as.numeric()
+          withProgress(message = 'Test ppm cutoff',value = 0,
+                       expr = {
+                         for (i in 1:3) {
+                           incProgress(1/3,detail = pro_optimize_step1[i])
+                           if (i == 1) {
+                             data_para_opt$step1.p = paramounter_part1(
+                               directory = paste0(para_data_check$MS1_path,"/POS/QC/"),
+                               massSDrange = massSDrange,
+                               smooth = smooth,
+                               cutoff = cutoff,
+                               filenum = filenum
+                             )
+                           } else if(i == 2) {
+                             data_para_opt$step1.n = paramounter_part1(
+                               directory = paste0(para_data_check$MS1_path,"/NEG/QC/"),
+                               massSDrange = massSDrange,
+                               smooth = smooth,
+                               cutoff = cutoff,
+                               filenum = filenum
+                             )
+                           } else if(i == 3) {
+                             data_para_opt$ppmCut.p = data_para_opt$step1.p$ppmCut
+                             writexl::write_xlsx(
+                               data.frame(ion = "positive",ppmCut = data_para_opt$ppmCut.p),paste0(para_data_check$MS1_path,"/POS/QC/ppmCut.xlsx")
+                             )
+                             data_para_opt$ppmCut.n = data_para_opt$step1.n$ppmCut
+                             writexl::write_xlsx(
+                               data.frame(ion = "negative",ppmCut = data_para_opt$ppmCut.n),paste0(para_data_check$MS1_path,"/NEG/QC/ppmCut.xlsx")
+                             )
+                             plt.p = data_para_opt$step1.p$plot + ggtitle("Mass tolerance in positive model")
+                             plt.n = data_para_opt$step1.n$plot + ggtitle("Mass tolerance in negative model")
+                           }
+                         }
+                       })
+          output$ppmCut_plt = renderPlot({
+            if(is.null(data_para_opt$step1.p)) {return()}
+            plt.p + plt.n
+          })
+        }
+
+      }
+    )
+    observeEvent(
+      input$action4,
+      {
+        if(is.null(input$MS1)){return()}
+        if(is.null(para_data_check$MS1_path)){return()}
+        pro_optimize_step2 = c(
+          'running positive model ...',
+          'running negative model ...',
+          'All finish'
+        )
+        if(file.exists(paste0(para_data_check$MS1_path,"/POS/QC/parameters.xlsx")) &
+           file.exists(paste0(para_data_check$MS1_path,"/POS/QC/parameters.xlsx"))
+        ) {
+          withProgress(message = 'optimize parameter',value = 0,
+                       expr = {
+                         for (i in 1:3) {
+                           incProgress(1/3,detail = pro_optimize_step2[i])
+                           if(i == 1) {
+                             data_para_opt$step2.p = readxl::read_xlsx(paste0(para_data_check$MS1_path,"/POS/QC/parameters.xlsx"))
+                           } else if(i == 2) {
+                             data_para_opt$step2.n = readxl::read_xlsx(paste0(para_data_check$MS1_path,"/NEG/QC/parameters.xlsx"))
+                           } else if (i == 3) {
+                             print("already done, use previous saved parameters")
+                           }
+                         }
+                       })
+
+      } else {
+        massSDrange = input$massSDrange.2 %>% as.numeric()
+        smooth = input$smooth.2 %>% as.numeric()
+        cutoff = input$cutoff.2 %>% as.numeric()
+        filenum = input$filenum.2 %>% as.numeric()
+
+        withProgress(message = 'optimize parameter',value = 0,
+                     expr = {
+                       for (i in 1:3) {
+                         incProgress(1/3,detail = pro_optimize_step2[i])
+                         if (i == 1) {
+                           data_para_opt$step2.p = paramounter_part2(
+                             directory = paste0(para_data_check$MS1_path,"/POS/QC/"),
+                             massSDrange = massSDrange,
+                             smooth = smooth,
+                             cutoff = cutoff,
+                             filenum = filenum,
+                             ppmCut = data_para_opt$ppmCut.p
+                           ) %>% dplyr::rename("Positive" = "Value")
+
+                         } else if(i == 2) {
+                           data_para_opt$step2.n = paramounter_part2(
+                             directory = paste0(para_data_check$MS1_path,"/NEG/QC/"),
+                             massSDrange = massSDrange,
+                             smooth = smooth,
+                             cutoff = cutoff,
+                             filenum = filenum,
+                             ppmCut = data_para_opt$ppmCut.n
+                           ) %>% dplyr::rename("Negative" = "Value")
+                         } else if (i == 3) {
+                           writexl::write_xlsx(data_para_opt$step2.p,paste0(para_data_check$MS1_path,"/POS/QC/parameters.xlsx"))
+                           writexl::write_xlsx(data_para_opt$step2.n,paste0(para_data_check$MS1_path,"/NEG/QC/parameters.xlsx"))
+                         }
+                       }
+                     })
+      }
+        data_para_opt$out_tbl = left_join(data_para_opt$step2.p,data_para_opt$step2.n)
+
+        output$parameters_opt = renderDataTable_formated(
+          actions = input$action4,
+          condition1 = data_para_opt$step2.p,
+          condition2 = data_para_opt$step2.n,
+          filename.a = "optimized_parameters",
+          tbl = data_para_opt$out_tbl
+        )
+
+      }
+    )
+
+    para_choise = reactive({
+      input$para_choise %>% as.character()
+    })
+
     #>peak picking
     #data_import_rv <- reactiveValues(data = NULL)
     observeEvent(
@@ -386,48 +577,75 @@ data_import_raw_server <- function(id,volumes,prj_init,data_import_rv) {
       {
         if(is.null(input$MS1)){return()}
         if(is.null(para_data_check$MS1_path)){return()}
+        para_choise = para_choise()
 
         pro_step = c('running positive model ...',
                      'running negative model ...',
                      'reading MS2 data',
                      'All finish!')
 
-        data_import_rv$ppm = as.numeric(input$ppm)
-        data_import_rv$threads = as.numeric(input$threads)
-        data_import_rv$snthresh = as.numeric(input$snthresh)
-        data_import_rv$noise = as.numeric(input$noise)
-        data_import_rv$min_fraction =as.numeric(input$min_fraction)
-        data_import_rv$p_min = as.numeric(input$p_min)
-        data_import_rv$p_max = as.numeric(input$p_max)
-        data_import_rv$pre_left = as.numeric(input$pre_left)
-        data_import_rv$pre_right = as.numeric(input$pre_right)
-        data_import_rv$fill_peaks = as.logical(input$fill_peaks)
-        data_import_rv$fitgauss = as.logical(input$fitgauss)
-        data_import_rv$integrate = as.numeric(input$integrate)
-        data_import_rv$mzdiff = as.numeric(input$mzdiff)
-        data_import_rv$binSize = as.numeric(input$binSize)
-        data_import_rv$bw = as.numeric(input$bw)
-        data_import_rv$out_put_peak = as.logical(input$out_put_peak)
-        data_import_rv$column = as.character(input$column)
-        data_import_rv$ms1.ms2.match.rt.tol = as.numeric(input$ms1.ms2.match.rt.tol)
-        data_import_rv$ms1.ms2.match.mz.tol = as.numeric(input$ms1.ms2.match.mz.tol)
-        data_import_rv$out_para_tbl = data.frame(
-          parameter = c("ppm",'peakwidth','snthresh','prefilter','fitgauss',
-                        'integrate','mzdiff','noise','threads','binSize',
-                        'bw','output_tic','output_bpc','output_rt_correction_plot',
-                        'min_fraction','fill_peaks','group_for_figure'),
-          value = c(data_import_rv$ppm,
-                    paste0('c(',data_import_rv$p_min,',',data_import_rv$p_max,')'),
-                    data_import_rv$snthresh,
-                    paste0('c(',data_import_rv$pre_left,',',data_import_rv$pre_right,')'),
-                    data_import_rv$fitgauss, data_import_rv$integrate, data_import_rv$mzdiff,
-                    data_import_rv$noise,data_import_rv$threads,data_import_rv$binSize,data_import_rv$bw,
-                    data_import_rv$out_put_peak,data_import_rv$out_put_peak,data_import_rv$out_put_peak,
-                    data_import_rv$min_fraction,data_import_rv$fill_peaks,'QC'
+        data_import_rv$parameters =
+          data.frame(
+            para = c("ppm","threads","snthresh","noise","min_fraction","p_min","p_max","pre_left","pre_right","fill_peaks","fitgauss",
+                     "integrate","mzdiff","binSize","bw","out_put_peak","column","ms1.ms2.match.rt.tol","ms1.ms2.match.mz.tol"),
+            default = c(input$ppm,input$threads,input$snthresh,input$noise,
+                        input$min_fraction,input$p_min,input$p_max,input$pre_left,
+                        input$pre_right,input$fill_peaks,input$fitgauss,input$integrate,
+                        input$mzdiff,input$binSize,input$bw,input$out_put_peak,input$column,
+                        input$ms1.ms2.match.rt.tol,input$ms1.ms2.match.mz.tol)
           )
-        )
+
+
+        if(para_choise == "yes") {
+          data_import_rv$parameters =
+          data_import_rv$parameters %>%
+            dplyr::left_join(data_para_opt$out_tbl,by = "para") %>%
+            dplyr::select(para,desc,default,Positive,Negative) %>%
+            mutate(
+              default = as.character(default),
+              Positive = as.character(Positive),
+              Negative = as.character(Negative),
+            ) %>%
+            dplyr::mutate(
+              Positive = case_when(
+                is.na(Positive) ~ default,
+                TRUE ~ Positive
+              ),
+              Negative = case_when(
+                is.na(Negative) ~ default,
+                TRUE ~ Negative
+              )
+            )
+        }
+        print(data_import_rv$parameters)
+
+
         #> function
-        process_data_fun = function(path,polarity){
+        process_data_fun = function(path,polarity,parameters){
+          if(ncol(parameters) == 3) {
+            n = 3
+          } else if(ncol(parameters) == 5) {
+            if(polarity == "positive") {n = 4} else if(polarity == "negative") {n = 5}
+          }
+          data_import_rv$ppm = as.numeric(data_import_rv$parameters[1,n])
+          data_import_rv$threads = as.numeric(data_import_rv$parameters[2,n])
+          data_import_rv$snthresh = as.numeric(data_import_rv$parameters[3,n])
+          data_import_rv$noise = as.numeric(data_import_rv$parameters[4,n])
+          data_import_rv$min_fraction =as.numeric(data_import_rv$parameters[5,n])
+          data_import_rv$p_min = as.numeric(data_import_rv$parameters[6,n])
+          data_import_rv$p_max = as.numeric(data_import_rv$parameters[7,n])
+          data_import_rv$pre_left = as.numeric(data_import_rv$parameters[8,n])
+          data_import_rv$pre_right = as.numeric(data_import_rv$parameters[9,n])
+          data_import_rv$fill_peaks = as.logical(data_import_rv$parameters[10,n])
+          data_import_rv$fitgauss = as.logical(data_import_rv$parameters[11,n])
+          data_import_rv$integrate = as.numeric(data_import_rv$parameters[12,n])
+          data_import_rv$mzdiff = as.numeric(data_import_rv$parameters[13,n])
+          data_import_rv$binSize = as.numeric(data_import_rv$parameters[14,n])
+          data_import_rv$bw = as.numeric(data_import_rv$parameters[15,n])
+          data_import_rv$out_put_peak = as.logical(data_import_rv$parameters[16,n])
+          data_import_rv$column = as.character(data_import_rv$parameters[17,n])
+          data_import_rv$ms1.ms2.match.rt.tol = as.numeric(data_import_rv$parameters[18,n])
+          data_import_rv$ms1.ms2.match.mz.tol = as.numeric(data_import_rv$parameters[19,n])
           process_data(
             path = path,
             polarity = polarity,
@@ -456,13 +674,11 @@ data_import_raw_server <- function(id,volumes,prj_init,data_import_rv) {
                          incProgress(1/4, detail = pro_step[i])
                          if(i == 1) {
                            process_data_fun(
-                             path = paste0(para_data_check$MS1_path,"/POS"),
-                             polarity = 'positive'
+                             path = paste0(para_data_check$MS1_path,"/POS"),polarity = "positive",parameters = data_import_rv$parameters
                            )
                          } else if(i == 2) {
                            process_data_fun(
-                             path = paste0(para_data_check$MS1_path,"/NEG"),
-                             polarity = 'negative'
+                             path = paste0(para_data_check$MS1_path,"/NEG"),polarity = "negative",parameters = data_import_rv$parameters
                            )
                          } else if(i == 3){
                            load(paste0(para_data_check$MS1_path,"/POS/Result/object"))
@@ -523,10 +739,8 @@ data_import_raw_server <- function(id,volumes,prj_init,data_import_rv) {
           actions = input$action2,
           condition1 = input$MS1,
           condition2 = para_data_check$MS1_path,
-          tbl = data_import_rv$out_para_tbl,filename.a = "3.3.rawDataImport_summary_of_parameters"
+          tbl = data_import_rv$parameters,filename.a = "3.3.rawDataImport_summary_of_parameters"
         )
-
-
 
         output$obj_mass_check.pos = renderPrint({
           print(data_import_rv$object_pos)

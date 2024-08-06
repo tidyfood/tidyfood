@@ -15,8 +15,7 @@ data_import_tbl_ui <- function(id) {
   nav_panel(
     title = 'Start with table file',
     icon = bs_icon("upload"),
-    navs_tab_card(
-      title = "Start with table file",
+    layout_sidebar(
       sidebar = sidebar(
         fileInput(
           inputId = ns('expmat'),
@@ -53,61 +52,45 @@ data_import_tbl_ui <- function(id) {
         textInput(inputId = ns("tbl_ms2_mz_tol"),label = "ms2 mz tolarance",value = 30),
         textInput(inputId = ns("tbl_ms2_rt_tol"),label = "ms2 rt tolarance",value = 15)
       ),
-      nav_panel(
-        title = "File check",
-        icon = bsicons::bs_icon("inbox"),
-        actionButton(ns('action1.1'),'Input file summary',icon = icon("computer-mouse"),width = "15%"),
-        tags$h3("Summary of input file",style = 'color: #008080'),
-        hr_head(),
-        htmlOutput(ns("file_check2")),
-        hr_head(),
-        layout_column_wrap(
-          width = 1/2,
-          height = 350,
-          card(
-            full_screen = T,
+      page_fluid(
+        nav_panel(
+          title = "File check",
+          icon = bsicons::bs_icon("inbox"),
+          actionButton(ns('action1.1'),'Input file summary',icon = icon("computer-mouse"),width = "15%"),
+          tags$h3("Summary of input file",style = 'color: #008080'),
+          htmlOutput(ns("file_check2")),
+          navset_card_tab(
             height = 350,
-            card_header(
-              "variable information"
+            full_screen = TRUE,
+            title = "MS data summary",
+            nav_panel(
+              "variable_info",
+              card_title("variable information"),
+              DT::dataTableOutput(ns("tbl_variable_info")),
             ),
-            DT::dataTableOutput(ns("tbl_variable_info")),
+            nav_panel(
+              "expression",
+              card_title("expression table"),
+              DT::dataTableOutput(ns("tbl_expmat"))
+            )
           ),
-          card(
-            full_screen = T,
+          actionButton(ns('action2.1'),'Generate massdataset object',icon = icon("computer-mouse"),width = "25%"),
+          tags$h3("Output file path",style = 'color: #008080'),
+          htmlOutput(ns("obj_mass_res_path")),
+          navset_card_tab(
             height = 350,
-            card_header(
-              "expression table"
+            full_screen = TRUE,
+            title = "Status",
+            nav_panel(
+              "Positive",
+              card_title("Positive model"),
+              verbatimTextOutput(ns("obj_mass_check.pos_tbl"))
             ),
-            DT::dataTableOutput(ns("tbl_expmat"))
-          )
-          )
-      ),
-      nav_panel(
-        title = "Import from peak picking data",
-        icon = bsicons::bs_icon("table"),
-        actionButton(ns('action2.1'),'Generate massdataset object',icon = icon("computer-mouse"),width = "25%"),
-        tags$h3("Output file path",style = 'color: #008080'),
-        hr_head(),
-        htmlOutput(ns("obj_mass_res_path")),
-        hr_head(),
-        layout_column_wrap(
-          width = 1/2,
-          height = 350,
-          card(
-            full_screen = T,
-            height = 350,
-            card_header(
-              "Positive"
-            ),
-            verbatimTextOutput(ns("obj_mass_check.pos_tbl")),
-          ),
-          card(
-            full_screen = T,
-            height = 350,
-            card_header(
-              "negative"
-            ),
-            verbatimTextOutput(ns("obj_mass_check.neg_tbl"))
+            nav_panel(
+              "negative",
+              card_title("Negative model"),
+              verbatimTextOutput(ns("obj_mass_check.neg_tbl"))
+            )
           )
         )
       )
