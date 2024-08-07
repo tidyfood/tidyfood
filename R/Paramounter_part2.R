@@ -259,7 +259,7 @@ paramounter_part2 = function(
   }
 
   #parallel run
-  plan(multisession, workers = availableCores() - 1)  # 设置并行策略
+  plan(multisession, workers = thread)  # 设置并行策略
 
   results <- future_map(.x = 1:filenum, .f = function(.x) {process_file(file = filename,q = .x)},.progress = T)
 
