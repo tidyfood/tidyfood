@@ -6,6 +6,7 @@
 #' @param massSDrange The range of standard deviations for mass differences, default value is 2 (95% confidence interval).
 #' @param smooth Chromatographic smoothness, default value is 0. For full scan data, use a positive value; for example, use smooth = 4 for a 4 Hz spectral rate.
 #' @param cutoff The ppm percentage for determining the cutoff line of mass accuracy distribution, default value is 0.95 (95%).
+#' @param thread thread num
 #' @importFrom future plan availableCores multisession
 #' @importFrom furrr future_map
 #' @import ggplot2
@@ -27,6 +28,7 @@ paramounter_part1 = function(
     massSDrange = 2,
     smooth = 0,
     cutoff = 0.95,
+    thread,
     filenum = c(3,5,"all")
 ){
  # filenum = match.arg(filenum)
@@ -75,7 +77,7 @@ paramounter_part1 = function(
   }
   #########################################################################################################
 
-  plan(multisession, workers = availableCores() - 1)
+  plan(multisession, workers = thread)
 
   process_file <- function(q) {
     # Parameter setting

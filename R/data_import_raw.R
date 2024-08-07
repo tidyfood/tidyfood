@@ -155,6 +155,7 @@ data_import_raw_ui <- function(id) {
                   textInput(inputId = ns("massSDrange.1"),label = "massSDrange",value = 2),
                   textInput(inputId = ns("smooth.1"),label = "smooth",value = 0),
                   textInput(inputId = ns("cutoff.1"),label = "cutoff",value = 0.95),
+                  textInput(inputId = ns("thread.1"),label = "thread",value = 5),
                   radioButtons(inputId = ns("filenum.1"),label = "filenum",choices = c(3,5,"all"),selected = 3),
                   actionButton(ns('action3'),'Start',icon = icon("computer-mouse")),
                 ),
@@ -169,6 +170,7 @@ data_import_raw_ui <- function(id) {
                       textInput(inputId = ns("massSDrange.2"),label = "massSDrange",value = 2),
                       textInput(inputId = ns("smooth.2"),label = "smooth",value = 0),
                       textInput(inputId = ns("cutoff.2"),label = "cutoff",value = 0.95),
+                      textInput(inputId = ns("thread.2"),label = "thread",value = 5),
                       radioButtons(inputId = ns("filenum.2"),label = "filenum",choices = c(3,5,"all"),selected = 3),
                       actionButton(ns('action4'),'Start',icon = icon("computer-mouse")),
                     ),
@@ -458,7 +460,8 @@ data_import_raw_server <- function(id,volumes,prj_init,data_import_rv) {
                                massSDrange = massSDrange,
                                smooth = smooth,
                                cutoff = cutoff,
-                               filenum = filenum
+                               filenum = filenum,
+                               thread = input$thread.1 %>% as.numeric()
                              )
                            } else if(i == 2) {
                              data_para_opt$step1.n = paramounter_part1(
@@ -466,7 +469,8 @@ data_import_raw_server <- function(id,volumes,prj_init,data_import_rv) {
                                massSDrange = massSDrange,
                                smooth = smooth,
                                cutoff = cutoff,
-                               filenum = filenum
+                               filenum = filenum,
+                               thread = input$thread.1 %>% as.numeric()
                              )
                            } else if(i == 3) {
                              data_para_opt$ppmCut.p = data_para_opt$step1.p$ppmCut
@@ -534,6 +538,7 @@ data_import_raw_server <- function(id,volumes,prj_init,data_import_rv) {
                              smooth = smooth,
                              cutoff = cutoff,
                              filenum = filenum,
+                             thread = input$thread.2 %>% as.numeric(),
                              ppmCut = data_para_opt$ppmCut.p
                            ) %>% dplyr::rename("Positive" = "Value")
 
@@ -544,7 +549,8 @@ data_import_raw_server <- function(id,volumes,prj_init,data_import_rv) {
                              smooth = smooth,
                              cutoff = cutoff,
                              filenum = filenum,
-                             ppmCut = data_para_opt$ppmCut.n
+                             ppmCut = data_para_opt$ppmCut.n,
+                             thread = input$thread.2 %>% as.numeric()
                            ) %>% dplyr::rename("Negative" = "Value")
                          } else if (i == 3) {
                            writexl::write_xlsx(data_para_opt$step2.p,paste0(para_data_check$MS1_path,"/POS/QC/parameters.xlsx"))
