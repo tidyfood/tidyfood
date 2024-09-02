@@ -7,12 +7,12 @@
 #' @param smooth Chromatographic smoothness, default value is 0. For full scan data, use a positive value; for example, use smooth = 4 for a 4 Hz spectral rate.
 #' @param cutoff The ppm percentage for determining the cutoff line of mass accuracy distribution, default value is 0.95 (95%).
 #' @param thread thread num
-#' @importFrom future plan availableCores multisession
-#' @importFrom furrr future_map
+#' @importFrom future plan multisession multicore
+#' @importFrom furrr future_map_dfr
+#' @importFrom purrr map_dfr
+#' @importFrom dplyr filter
 #' @import ggplot2
 #' @importFrom MSnbase readMSData mz intensity rtime
-#' @importFrom data.table rbindlist
-#' @importFrom plotly ggplotly plot_ly add_trace layout
 #' @references see https://github.com/HuanLab/Paramounter
 #' @description
 #' Research paper: https://pubs.acs.org/doi/10.1021/acs.analchem.1c04758
@@ -75,12 +75,15 @@ paramounter_part1 = function(
       return(y)
     }
   }
-  #########################################################################################################
 
-  plan(multisession, workers = thread)
+
+  if(str_detect(Sys.info()["sysname"],'Linux')){
+    plan(multicore, workers = thread)
+  } else {
+    plan(multisession, workers = thread)
+  }
 
   process_file <- function(q) {
-    # Parameter setting
     ms1data <- readMSData(files = paste0(directory,filename[q]), mode = "onDisk", msLevel. = 1)
     mzRange <- c(min(unlist(mz(ms1data))), max(unlist(mz(ms1data))))
     ROI <- seq(mzRange[1], mzRange[2], 0.05)
@@ -92,9 +95,10 @@ paramounter_part1 = function(
     mzdiff2Ddist <- as.data.frame(matrix(ncol = 3, nrow = 1))
     colnames(mzdiff2Ddist) <- c("mz", "rt", "mzdiff")
 
-    # ROI detection and universal parameter estimation
-    for(i in 1:(length(ROI) - 1)) {
-      # Obtain data lists in each m/z bin
+    # 并行处理每个ROI
+    split_ppm2Ddist <- furrr::future_map_dfr(.x = c(1:(length(ROI) - 1)),.f = function(.x) {
+      blank_ppm2Ddist = data.frame(mz = NA,rt=NA,ppm=NA)
+      i = .x
       currmzRange <- c(ROI[i], ROI[i+1])
       tmpMZdata <- mzData
       tmpINTdata <- intData
@@ -115,7 +119,7 @@ paramounter_part1 = function(
         }
         eicRT[k] <- rtime[k]
       }
-      if(sum(eicINTraw != 0) == 0) next()
+      if(sum(eicINTraw != 0) == 0) return(blank_ppm2Ddist)
       # Sort the intensity vectors from each m/z bin, estimate the noise cut off and average
       eicINT <- peak_smooth(eicINTraw)
       eicNon0 <- sort(eicINT[eicINT > 0])
@@ -134,7 +138,7 @@ paramounter_part1 = function(
       }
 
       aboveTHindex <- which(eicINT > cutOFF)
-      if(length(aboveTHindex) == 0) next()
+      if(length(aboveTHindex) == 0) return(blank_ppm2Ddist)
       candidateSegInd <- split(aboveTHindex, cumsum(c(1, diff(aboveTHindex) != 1)))
       peakInd <- c()
       for(x in 1:length(candidateSegInd)){
@@ -212,21 +216,20 @@ paramounter_part1 = function(
 
         if(length(currSamePeakMass) > 1){
           ppmDiff[z] <- (massSDrange*sd(currSamePeakMass))/currRefMz * 1e6
-          ppm2Ddist <- rbind(ppm2Ddist, c(currRefMz, rtime[[peakInd[z]]], ppmDiff[z]))
+          temp_ppm2Ddist = data.frame(
+            mz = currRefMz,rt = rtime[[peakInd[z]]],ppm = ppmDiff[z]
+          )
+        } else {
+          temp_ppm2Ddist = blank_ppm2Ddist
         }
+        return(temp_ppm2Ddist)
       }
-    }
+    },.progress = T) %>% dplyr::filter(!is.na(ppm))
 
-    return(ppm2Ddist)
+    return(split_ppm2Ddist)
   }
 
-
-
-  results <- future_map(file_select, process_file,.progress = T)
-
-  # bind all results
-  ppm2D <- rbindlist(results)
-
+  ppm2D <- purrr::map_dfr(.x = file_select, .f = process_file)
 
   ppm2D <- ppm2D[complete.cases(ppm2D),]
   ppm2D <- ppm2D[order(ppm2D[,3]),]

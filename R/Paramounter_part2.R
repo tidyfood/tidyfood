@@ -31,7 +31,7 @@ paramounter_part2 = function(
     thread,
     ppmCut
 ) {
- # filenum = match.arg(filenum)
+  # filenum = match.arg(filenum)
   filename <- list.files(path = directory,pattern = ".mzXML")
   start_time <- Sys.time()
   mzDiff <- c()
@@ -74,7 +74,6 @@ paramounter_part2 = function(
 
   #process function
   process_file <- function(file,q) {
-    # Parameter setting
     ms1data <- readMSData(files = paste0(directory,file[q]), mode = "onDisk", msLevel. = 1)
     mzRange <- c(min(unlist(mz(ms1data))), max(unlist(mz(ms1data))))
     ROI <- seq(mzRange[1], mzRange[2], 0.05)
@@ -94,8 +93,18 @@ paramounter_part2 = function(
     noiseALL <- c()
 
     # ROI detection and universal parameter estimation
-    for (i in 1:(length(ROI) - 1)) {
-      # Obtain data lists in each m/z bin
+    split_res_list =  furrr::future_map(.x = c(1:(length(ROI) - 1)),.f = function(.x) {
+      i = .x
+
+      blank_list = list(ppm2Ddist = ppm2Ddist,
+                        mzdiff2Ddist = mzdiff2Ddist,
+                        peakWidthALL = peakWidthALL,
+                        peakScansALL = peakScansALL,
+                        snALL = snALL,
+                        sALL = sALL,
+                        ShiftTable = ShiftTable,
+                        noiseALL = noiseALL)
+
       currmzRange <- c(ROI[i], ROI[i+1])
       tmpMZdata <- mzData
       tmpINTdata <- intData
@@ -116,7 +125,7 @@ paramounter_part2 = function(
         }
         eicRT[k] <- rtime[k]
       }
-      if (sum(eicINTraw != 0) == 0) next()
+      if (sum(eicINTraw != 0) == 0) return(blank_list)
       # Sort the intensity vectors from each m/z bin, estimate the noise cut off and average
       eicINT <- peak_smooth(eicINTraw)
       eicNon0 <- sort(eicINT[eicINT > 0])
@@ -139,7 +148,7 @@ paramounter_part2 = function(
 
       # Find the Reference m/z in each ROI from each m/z bin
       aboveTHindex <- which(eicINT > cutOFF)
-      if (length(aboveTHindex) == 0) next()
+      if (length(aboveTHindex) == 0) return(blank_list)
       candidateSegInd <- split(aboveTHindex, cumsum(c(1, diff(aboveTHindex) != 1)))
       peakInd <- c()
       for (x in 1:length(candidateSegInd)) {
@@ -254,8 +263,28 @@ paramounter_part2 = function(
           }
         }
       }
-    }
-    list(ppm2Ddist = ppm2Ddist, mzdiff2Ddist = mzdiff2Ddist, peakWidthALL = peakWidthALL, peakScansALL = peakScansALL, snALL = snALL, sALL = sALL, ShiftTable = ShiftTable, noiseALL = noiseALL)
+      final_list = list(ppm2Ddist = ppm2Ddist,
+                        mzdiff2Ddist = mzdiff2Ddist,
+                        peakWidthALL = peakWidthALL,
+                        peakScansALL = peakScansALL,
+                        snALL = snALL,
+                        sALL = sALL,
+                        ShiftTable = ShiftTable,
+                        noiseALL = noiseALL)
+      return(final_list)
+    },.progress = T)
+
+    final_result = list(
+      ppm2Ddist = bind_rows(lapply(split_res_list, function(x) x$ppm2Ddist)) %>% filter(!is.na(mz)),
+      mzdiff2Ddist = bind_rows(lapply(split_res_list, function(x) x$mzdiff2Ddist)) %>% filter(!is.na(mz)),
+      peakWidthALL = unlist(lapply(split_res_list, function(x) x$peakWidthALL), use.names = FALSE),
+      peakScansALL = unlist(lapply(split_res_list, function(x) x$peakScansALL), use.names = FALSE),
+      snALL = unlist(lapply(split_res_list, function(x) x$snALL), use.names = FALSE),
+      sALL = unlist(lapply(split_res_list, function(x) x$sALL), use.names = FALSE),
+      ShiftTable = bind_rows(lapply(split_res_list, function(x) x$ShiftTable)) %>% filter(!is.na(mz)),
+      noiseALL = unlist(lapply(split_res_list, function(x) x$noiseALL), use.names = FALSE)
+    )
+    return(final_result)
   }
 
   #parallel run
@@ -266,7 +295,7 @@ paramounter_part2 = function(
   } # 设置并行策略
 
 
-  results <- future_map(.x = 1:filenum, .f = function(.x) {process_file(file = filename,q = .x)},.progress = T)
+  results1 <- purrr::map(.x = 1:filenum, .f = function(.x) {process_file(file = filename,q = .x)})
 
   # extract parameters
   ppm2D <- do.call(rbind, lapply(results, function(x) x$ppm2Ddist))
@@ -416,83 +445,18 @@ paramounter_part2 = function(
     XCMSparameters = data.frame(
       para = c("ppm","p_min","p_max","snthresh","mzdiff","integrate","pre_left","pre_right","noise","bw","min_fraction","mzwid","minsamp","max"),
       desc = c("ppm", "peakwidth min", "peakwidth max", "signal/noise threshold (snthresh)", "mzdiff", "integrate",
-                     "prefilter peaks", "prefilter intensity", "noise","bw", "min_fraction", "mzwid", "minsamp", "max"),
+               "prefilter peaks", "prefilter intensity", "noise","bw", "min_fraction", "mzwid", "minsamp", "max"),
       Value = c(maxppm, minpeakwidth, maxpeakwidth, minSN, -0.01, 1, minpeakscan, minnoise, minnoise, 5, 0.5, maxmassshift, 1, 100)
     )
   } else {
     XCMSparameters = data.frame(
       para = c("ppm","p_min","p_max","snthresh","mzdiff","integrate","pre_left","pre_right","noise"),
       desc = c("ppm", "peakwidth min", "peakwidth max", "signal/noise threshold (snthresh)", "mzdiff", "integrate",
-                     "prefilter peaks", "prefilter intensity", "noise"),
+               "prefilter peaks", "prefilter intensity", "noise"),
       Value = c(maxppm, minpeakwidth, maxpeakwidth, minSN, -0.01, 1, minpeakscan, minnoise, minnoise)
     )
   }
   return(XCMSparameters)
-  # library(ggplot2)
-  #
-  # # 绘制噪音水平的直方图
-  # ggplot(data.frame(noise = noiselevel), aes(x = noise)) +
-  #   geom_histogram(breaks = seq(0, 500000000, 200), fill = "black") +
-  #   xlim(0, 10000) +
-  #   labs(x = "noise", y = "Frequency", title = "noise") +
-  #   theme(
-  #     plot.title = element_text(size = 20, hjust = 0.5),
-  #     axis.title = element_text(size = 17),
-  #     axis.text = element_text(size = 14)
-  #   )
-  #
-  # # 绘制质量公差的散点图
-  # ggplot(ppm2D, aes(x = mz, y = ppm)) +
-  #   geom_point() +
-  #   labs(x = "m/z", y = "ppm", title = "mass tolerance") +
-  #   theme(
-  #     plot.title = element_text(size = 20, hjust = 0.5),
-  #     axis.title = element_text(size = 17),
-  #     axis.text = element_text(size = 14)
-  #   )
-  #
-  # # 绘制信噪比的直方图
-  # ggplot(data.frame(SNRatio = SNRatio[which(SNRatio < 10)]), aes(x = SNRatio)) +
-  #   geom_histogram(breaks = seq(0, 10, 0.5), fill = "black") +
-  #   xlim(0, 10) +
-  #   labs(x = "S/N ratio", y = "Frequency", title = "peak height") +
-  #   theme(
-  #     plot.title = element_text(size = 20, hjust = 0.5),
-  #     axis.title = element_text(size = 17),
-  #     axis.text = element_text(size = 14)
-  #   )
-  #
-  # # 绘制峰宽的直方图
-  # ggplot(data.frame(peakWidth = peakWidth[which(peakWidth <= 300)]), aes(x = peakWidth)) +
-  #   geom_histogram(breaks = seq(0, 300, 5), fill = "black") +
-  #   xlim(0, 100) +
-  #   labs(x = "peakwidth (seconds)", y = "Frequency", title = "peak width") +
-  #   theme(
-  #     plot.title = element_text(size = 20, hjust = 0.5),
-  #     axis.title = element_text(size = 17),
-  #     axis.text = element_text(size = 14)
-  #   )
-  #
-  # if(isTRUE(export_plot)) {
-  #   dir.create("Parameters_for_XCMS")
-  #   png(file="Parameters for XCMS.png",width=1500, height=1300)
-  #   par(mfrow=c(2,2))
-  #   hist(noiselevel, xlab = "noise", xlim = c(0, 10000), breaks = seq(0, 500000000, 200), xaxp  = c(0, 10000, 50),
-  #        cex.main=4, cex.lab=1.7, cex.axis=2, main = "noise", col = "black")
-  #   plot(ppm2D$mz, ppm2D$ppm, ylab = "ppm", xlab = "m/z",
-  #        cex.main=4, cex.lab=1.7, cex.axis=2, main = "mass tolerance")
-  #   hist(SNRatio[which(SNRatio < 10)], xlab = "S/N ratio", xlim = c(0, 10), breaks = seq(0,10, 0.5), xaxp  = c(0, 10, 20),
-  #        cex.main=4, cex.lab=1.7, cex.axis=2, main = "peak height", col = "black")
-  #   hist(peakWidth[which(peakWidth <= 300)], xlab = "peakwidth (seconds)", xlim = c(0,100), breaks = seq(0,300,5),
-  #        xaxp  = c(0, 300, 60), cex.main=4, cex.lab=1.7, cex.axis=2, main = "peak width", col = "black")
-  #   dev.off()
-  #   if(length(filename) > 1) {
-  #     png(file="Parameters for XCMS2.png",width=1500, height=1300)
-  #     par(mfrow=c(1,2))
-  #     hist(massShiftALL[which(massShiftALL <= 0.03)], xlab = "massShift (Da)", xlim = c(0,0.03), breaks = seq(0,0.03,0.001),
-  #          cex.main=4, cex.lab=1.7, cex.axis=2, main = "instrumental mass shift", col = "black")
-  #     hist(rtShiftALL[which(rtShiftALL <= 60)], xlab = "rtShift (seconds)", xlim = c(0,60), breaks = seq(0,60,2),
-  #          cex.main=4, cex.lab=1.7, cex.axis=2, main = "instrumental retention time shift", col = "black")
-  #     dev.off()
-  #   }
-  }
+  print(Sys.time() - start_time)
+  message("All finish")
+}
