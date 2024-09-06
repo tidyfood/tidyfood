@@ -19,11 +19,11 @@ A named vector of available volumes with optional exclusions.
 \description{
 This function retrieves available volume information based on the operating system
 the R session is currently running on. It supports MacOS, Linux, and Windows.
-Specifically for Windows, it addresses a bug in `shinyFiles::getVolumes` related
+Specifically for Windows, it addresses a bug in \code{shinyFiles::getVolumes} related
 to handling paths with Chinese characters, ensuring correct handling of such paths.
 
 This function retrieves available volume information based on the operating system
 the R session is currently running on. It supports MacOS, Linux, and Windows.
-Specifically for Windows, it addresses a bug in `shinyFiles::getVolumes` related
+Specifically for Windows, it addresses a bug in \code{shinyFiles::getVolumes} related
 to handling paths with Chinese characters, ensuring correct handling of such paths.
 }

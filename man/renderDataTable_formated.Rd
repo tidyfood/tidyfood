@@ -19,11 +19,11 @@ renderDataTable_formated(
 
 \item{condition1}{First condition to check before rendering the table; if NULL, the table is not rendered.}
 
-\item{condition2}{Second condition to check; similar to `condition1`.}
+\item{condition2}{Second condition to check; similar to \code{condition1}.}
 
-\item{condition3}{Third condition to check; similar to `condition1`.}
+\item{condition3}{Third condition to check; similar to \code{condition1}.}
 
-\item{condition4}{Fourth condition to check; similar to `condition1`.}
+\item{condition4}{Fourth condition to check; similar to \code{condition1}.}
 
 \item{filename.a}{The base filename for the CSV download button.}
 
@@ -33,7 +33,7 @@ renderDataTable_formated(
 A DataTable object that is rendered within Shiny applications.
 }
 \description{
-This function wraps `DT::renderDataTable` to provide additional functionality
+This function wraps \code{DT::renderDataTable} to provide additional functionality
 including preset conditions, custom buttons for display control, and a CSV download
 option. It allows for a highly customizable DataTable presentation with specific
 interactive features tailored for enhanced user interaction.
@@ -41,6 +41,6 @@ interactive features tailored for enhanced user interaction.
 \details{
 The function integrates several customization options including custom buttons that
 allow users to toggle the display length of the table and to download the full table data.
-The `actions` parameter can be used to inject specific JavaScript actions directly into
+The \code{actions} parameter can be used to inject specific JavaScript actions directly into
 the DataTable initialization.
 }

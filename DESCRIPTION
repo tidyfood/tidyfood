@@ -1,18 +1,41 @@
 Package: tidyfood
 Title: R packages for food omics data (mass spectrometry) processing and analysis
 Version: 0.0.0.9000
-Authors@R: 
-    person(given = "firstname",
-           family = "lastname",
+Authors@R: c(
+    person(given = "Xiaotao",
+           family = "Shen",
+           role = c("aut"),
+           email = "xiaotao.shen@outlook.com",
+           comment = c(ORCID = "0000-0002-9608-9964")),
+    person(given = "Xiao",
+           family = "Wang",
            role = c("aut", "cre"),
-           email = "your@email.com")
-Description: What the package does (one paragraph).
-License: What license is it under?
+           email = "shawnwang2016@126.com")
+           )
+Description: The 'tidyfood' package is a collection of several packages for food omics data (Mass Spectrometry) processing and analysis. 
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Depends: 
+    R (>= 4.1)
 Imports: 
     config (>= 0.3.2),
     golem (>= 0.4.1),
     pkgload,
     shiny (>= 1.8.1.1)
-Encoding: UTF-8
-LazyData: true
-RoxygenNote: 7.3.1
+Suggests: 
+    knitr,
+    rmarkdown,
+    shiny
+VignetteBuilder: knitr
+Remotes: 
+    gitlab::tidymass/masstools,
+    gitlab::tidymass/massdataset,
+    gitlab::tidymass/massprocesser,
+    gitlab::tidymass/masscleaner,
+    gitlab::tidymass/massstat,
+    gitlab::tidymass/metpath,
+    gitlab::tidymass/metid,
+    gitlab::tidymass/massqc
