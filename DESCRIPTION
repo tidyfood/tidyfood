@@ -1,5 +1,5 @@
 Package: tidyfood
-Title: An Amazing Shiny App
+Title: R packages for food omics data (mass spectrometry) processing and analysis
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "firstname",
